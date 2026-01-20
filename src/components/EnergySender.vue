@@ -934,12 +934,16 @@ onUnmounted(() => {
   }
   
   .balance-section {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .info-card {
     padding: 12px;
+  }
+  
+  .info-card label {
+    font-size: 11px;
   }
   
   .info-card .value {
