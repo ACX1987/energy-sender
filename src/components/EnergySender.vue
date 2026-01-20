@@ -56,15 +56,11 @@
         <div class="msg-header">
           <span class="time">{{ formatTime(msg.timestamp) }}</span>
           <span :class="['status', msg.status]">
-            {{ msg.status === 'success' ? '✓ 成功' : '✗ 失败' }}
+            {{ msg.status === 'success' ? '✓ 成功' : msg.status === 'pending' ? '⏳ 验证中...' : '✗ 失败' }}
           </span>
         </div>
         <div class="msg-address">{{ msg.address }}</div>
-        <div v-if="msg.orderId" class="msg-order">订单ID: {{ msg.orderId }}</div>
         <div v-if="msg.error" class="msg-error">{{ msg.error }}</div>
-        <div v-if="msg.cost" class="msg-cost">
-          消耗: {{ msg.cost }} TRX
-        </div>
       </div>
       <div v-if="messages.length === 0" class="empty">
         暂无发送记录
@@ -75,6 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
 import { getBalance, sendEnergy } from '../api/energy'
 
 // ========== 配置 ==========
@@ -94,10 +91,8 @@ interface Message {
   id: string
   timestamp: number
   address: string
-  status: 'success' | 'failed'
+  status: 'success' | 'failed' | 'pending'
   error?: string
-  cost?: number
-  orderId?: string
 }
 
 const messages = ref<Message[]>([])
@@ -181,6 +176,67 @@ const stopBalanceRefresh = () => {
 }
 
 // ========== 能量发送 ==========
+let oldEnergy = 0  // 存储发送前的能量值
+
+// 查询地址能量
+const queryAddressEnergy = async (address: string): Promise<number> => {
+  try {
+    const response = await axios.get(`https://trx.ceo/api/index/energy?address=${address}`)
+    if (response.data && typeof response.data.energy === 'number') {
+      return response.data.energy
+    }
+    return 0
+  } catch (error) {
+    console.error('查询地址能量失败:', error)
+    return 0
+  }
+}
+
+// 验证能量是否到账
+const verifyEnergyReceived = async (address: string, msgId: string): Promise<void> => {
+  let attempts = 0
+  const maxAttempts = 60  // 最多查询60次（60秒）
+  
+  const checkEnergy = async () => {
+    attempts++
+    const currentEnergy = await queryAddressEnergy(address)
+    
+    // 检查是否到账
+    if (currentEnergy > oldEnergy && currentEnergy - oldEnergy >= 129000) {
+      // 能量到账成功
+      const msgIndex = messages.value.findIndex(m => m.id === msgId)
+      if (msgIndex !== -1) {
+        const msg = messages.value[msgIndex]
+        if (msg) {
+          msg.status = 'success'
+          saveMessages()
+        }
+      }
+      return true
+    }
+    
+    // 超过最大尝试次数
+    if (attempts >= maxAttempts) {
+      const msgIndex = messages.value.findIndex(m => m.id === msgId)
+      if (msgIndex !== -1) {
+        const msg = messages.value[msgIndex]
+        if (msg) {
+          msg.status = 'failed'
+          msg.error = '验证超时，请手动检查'
+          saveMessages()
+        }
+      }
+      return false
+    }
+    
+    // 继续查询
+    setTimeout(() => checkEnergy(), 1000)
+    return false
+  }
+  
+  checkEnergy()
+}
+
 const handleSendEnergy = async () => {
   if (!receiveAddress.value.trim()) {
     alert('请输入接收地址')
@@ -202,6 +258,10 @@ const handleSendEnergy = async () => {
   const address = receiveAddress.value.trim()
   
   try {
+    // 1. 查询发送前的能量
+    oldEnergy = await queryAddressEnergy(address)
+    
+    // 2. 发送能量
     const response = await sendEnergy(
       apiKey.value,
       address,
@@ -210,31 +270,44 @@ const handleSendEnergy = async () => {
       RES_LOCK
     )
     
-    const msg: Message = {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      address: address,
-      status: response.code === 1 ? 'success' : 'failed',
-      error: response.code !== 1 ? response.msg : undefined,
-      cost: response.data?.orderMoney,
-      orderId: response.data?.orderId
-    }
-    
-    // 添加到消息列表
-    messages.value.unshift(msg)
-    
-    // 只保留最近20条
-    if (messages.value.length > 20) {
-      messages.value = messages.value.slice(0, 20)
-    }
-    
-    // 保存到本地
-    saveMessages()
-    
-    // 成功后清空输入框并刷新余额
-    if (msg.status === 'success') {
+    if (response.code === 1) {
+      // 3. 创建待验证的消息记录
+      const msgId = Date.now().toString()
+      const msg: Message = {
+        id: msgId,
+        timestamp: Date.now(),
+        address: address,
+        status: 'pending'
+      }
+      
+      // 添加到消息列表
+      messages.value.unshift(msg)
+      
+      // 只保留最近20条
+      if (messages.value.length > 20) {
+        messages.value = messages.value.slice(0, 20)
+      }
+      
+      // 保存到本地
+      saveMessages()
+      
+      // 4. 开始验证能量到账
+      verifyEnergyReceived(address, msgId)
+      
+      // 清空输入框并刷新余额
       receiveAddress.value = ''
       setTimeout(fetchBalance, 1000)
+    } else {
+      // 发送失败
+      const msg: Message = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        address: address,
+        status: 'failed',
+        error: response.msg || '发送失败'
+      }
+      messages.value.unshift(msg)
+      saveMessages()
     }
     
   } catch (error: any) {
@@ -453,6 +526,10 @@ onUnmounted(() => {
 
 .message-item.success {
   border-left-color: #52c41a;
+}
+
+.message-item.pending {
+  border-left-color: #faad14;
 }
 
 .message-item.failed {
