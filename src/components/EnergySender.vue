@@ -199,23 +199,26 @@ const queryAddressEnergy = async (address: string): Promise<number> => {
 }
 
 // 验证能量是否到账
-const verifyEnergyReceived = async (address: string, msgId: string): Promise<void> => {
+const verifyEnergyReceived = async (address: string, msgId: string, baseEnergy: number): Promise<void> => {
   let attempts = 0
   const maxAttempts = 60  // 最多查询60次（60秒）
   let isVerifying = true  // 验证状态标记
+  
+  console.log(`🔍 开始验证 - 基准能量: ${baseEnergy}`)
   
   const checkEnergy = async (): Promise<void> => {
     if (!isVerifying) return  // 如果已经验证完成，停止查询
     
     attempts++
     const currentEnergy = await queryAddressEnergy(address)
-    console.log(`第${attempts}次查询 - 当前能量: ${currentEnergy}, 旧能量: ${oldEnergy}, 差值: ${currentEnergy - oldEnergy}`)
+    const diff = currentEnergy - baseEnergy
+    console.log(`第${attempts}次查询 - 当前: ${currentEnergy}, 基准: ${baseEnergy}, 差值: ${diff}`)
     
-    // 检查是否到账
-    if (currentEnergy > oldEnergy && currentEnergy - oldEnergy >= 129000) {
+    // 检查是否到账：差值 >= 129000
+    if (diff >= 129000) {
       // 能量到账成功
       isVerifying = false  // 停止验证
-      console.log('✅ 能量验证成功！')
+      console.log(`✅ 能量验证成功！差值: ${diff}`)
       
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
@@ -231,14 +234,14 @@ const verifyEnergyReceived = async (address: string, msgId: string): Promise<voi
     // 超过最大尝试次数
     if (attempts >= maxAttempts) {
       isVerifying = false  // 停止验证
-      console.log('❌ 验证超时（60秒）')
+      console.log(`❌ 验证超时（60秒）- 最终差值: ${diff}`)
       
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
         const msg = messages.value[msgIndex]
         if (msg) {
           msg.status = 'failed'
-          msg.error = '验证超时（60秒），能量可能延迟到账'
+          msg.error = `验证超时（60秒），能量差值: ${diff}`
           saveMessages()
         }
       }
@@ -307,8 +310,8 @@ const handleSendEnergy = async () => {
       // 保存到本地
       saveMessages()
       
-      // 4. 开始验证能量到账（使用之前查询的 oldEnergy）
-      verifyEnergyReceived(address, msgId)
+      // 4. 开始验证能量到账（使用之前查询的 oldEnergy 作为基准）
+      verifyEnergyReceived(address, msgId, oldEnergy)
       
       // 清空输入框并刷新余额
       receiveAddress.value = ''
