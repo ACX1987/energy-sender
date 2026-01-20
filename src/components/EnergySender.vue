@@ -186,10 +186,14 @@ const queryAddressEnergy = async (address: string): Promise<number> => {
     // 正确解析返回格式：{ code: 1, data: { energy: xxx } }
     if (response.data && response.data.code === 1 && response.data.data) {
       const energy = response.data.data.energy
-      if (typeof energy === 'number') {
-        return energy
+      // energy 可能是字符串或数字，统一转换为数字
+      const energyNum = typeof energy === 'string' ? parseInt(energy, 10) : energy
+      if (typeof energyNum === 'number' && !isNaN(energyNum)) {
+        console.log('解析能量值:', energyNum)
+        return energyNum
       }
     }
+    console.warn('能量解析失败，返回0')
     return 0
   } catch (error) {
     console.error('查询地址能量失败:', error)
