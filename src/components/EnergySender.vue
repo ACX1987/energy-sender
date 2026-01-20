@@ -196,14 +196,21 @@ const queryAddressEnergy = async (address: string): Promise<number> => {
 const verifyEnergyReceived = async (address: string, msgId: string): Promise<void> => {
   let attempts = 0
   const maxAttempts = 60  // 最多查询60次（60秒）
+  let isVerifying = true  // 验证状态标记
   
-  const checkEnergy = async () => {
+  const checkEnergy = async (): Promise<void> => {
+    if (!isVerifying) return  // 如果已经验证完成，停止查询
+    
     attempts++
     const currentEnergy = await queryAddressEnergy(address)
+    console.log(`第${attempts}次查询 - 当前能量: ${currentEnergy}, 旧能量: ${oldEnergy}, 差值: ${currentEnergy - oldEnergy}`)
     
     // 检查是否到账
     if (currentEnergy > oldEnergy && currentEnergy - oldEnergy >= 129000) {
       // 能量到账成功
+      isVerifying = false  // 停止验证
+      console.log('✅ 能量验证成功！')
+      
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
         const msg = messages.value[msgIndex]
@@ -212,11 +219,14 @@ const verifyEnergyReceived = async (address: string, msgId: string): Promise<voi
           saveMessages()
         }
       }
-      return true
+      return
     }
     
     // 超过最大尝试次数
     if (attempts >= maxAttempts) {
+      isVerifying = false  // 停止验证
+      console.log('❌ 验证超时')
+      
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
         const msg = messages.value[msgIndex]
@@ -226,12 +236,11 @@ const verifyEnergyReceived = async (address: string, msgId: string): Promise<voi
           saveMessages()
         }
       }
-      return false
+      return
     }
     
     // 继续查询
     setTimeout(() => checkEnergy(), 1000)
-    return false
   }
   
   checkEnergy()
