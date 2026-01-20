@@ -5,8 +5,13 @@ import EnergySender from './components/EnergySender.vue'
 <template>
   <div id="app">
     <header class="app-header">
-      <h1>⚡ 能量发送工具</h1>
-      <p>快速发送 TRON 能量</p>
+      <div class="header-logo">
+        <img src="/tron-logo.svg" alt="TRON" class="logo-icon" />
+        <div class="header-text">
+          <h1>⚡ TRON 能量发送工具</h1>
+          <p>快速发送 TRON 能量</p>
+        </div>
+      </div>
     </header>
     <main>
       <EnergySender />
@@ -42,6 +47,23 @@ body {
   color: white;
 }
 
+.header-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+}
+
+.header-text {
+  text-align: left;
+}
+
 .app-header h1 {
   font-size: 32px;
   margin-bottom: 8px;
@@ -72,6 +94,15 @@ main {
   
   .app-header {
     padding: 20px 12px 12px;
+  }
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .header-logo {
+    gap: 12px;
   }
   
   main {
