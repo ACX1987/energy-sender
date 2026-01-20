@@ -110,10 +110,6 @@ const maskedKey = computed(() => {
 
 const costPerOrder = computed(() => COST_PER_ORDER)
 
-const balance = computed(() => {
-  return availableOrders.value * COST_PER_ORDER
-})
-
 // ========== API Key 管理 ==========
 const saveApiKey = () => {
   if (!apiKeyInput.value.trim()) {
