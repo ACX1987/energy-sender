@@ -99,7 +99,42 @@ main {
   text-decoration: underline;
 }
 
-@media (max-width: 768px) {
+/* 响应式设计 */
+/* 移动端竖屏 */
+@media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 20px;
+  }
+  
+  .app-header p {
+    font-size: 13px;
+  }
+  
+  .app-header {
+    padding: 16px 10px 10px;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .header-logo {
+    gap: 10px;
+  }
+  
+  main {
+    padding: 10px;
+  }
+  
+  .app-footer {
+    padding: 16px;
+    font-size: 11px;
+  }
+}
+
+/* 移动端横屏 / 小屏幕设备 */
+@media (min-width: 481px) and (max-width: 768px) {
   .app-header h1 {
     font-size: 24px;
   }
@@ -119,6 +154,48 @@ main {
   
   main {
     padding: 12px;
+  }
+}
+
+/* 平板设备 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-header h1 {
+    font-size: 28px;
+  }
+  
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* 横屏低高度优化 */
+@media (max-height: 600px) and (orientation: landscape) {
+  .app-header {
+    padding: 12px 16px 8px;
+  }
+  
+  .app-header h1 {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+  
+  .app-header p {
+    font-size: 12px;
+  }
+  
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  main {
+    padding: 12px;
+  }
+  
+  .app-footer {
+    padding: 12px;
+    font-size: 11px;
   }
 }
 </style>

@@ -709,17 +709,80 @@ onUnmounted(() => {
 }
 
 /* 响应式设计 */
-@media (max-width: 768px) {
+/* 移动端竖屏 (宽度 < 480px) */
+@media (max-width: 480px) {
+  .energy-sender {
+    padding: 10px;
+  }
+  
+  .api-key-section {
+    padding: 16px;
+  }
+  
+  .balance-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .info-card {
+    padding: 12px;
+  }
+  
+  .info-card .value {
+    font-size: 16px;
+  }
+  
+  .info-card .value.highlight {
+    font-size: 20px;
+  }
+  
+  .send-section {
+    padding: 16px;
+  }
+  
+  .send-section input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
+  .send-section button {
+    padding: 12px;
+    font-size: 15px;
+  }
+  
+  .message-list h3 {
+    font-size: 16px;
+  }
+  
+  .message-item {
+    padding: 12px;
+  }
+  
+  .msg-address {
+    font-size: 12px;
+  }
+  
+  .back-to-top {
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+}
+
+/* 移动端横屏 (480px < 宽度 < 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
   .energy-sender {
     padding: 12px;
   }
   
   .balance-section {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .info-card .value.highlight {
-    font-size: 20px;
+    font-size: 22px;
   }
   
   .back-to-top {
@@ -728,6 +791,67 @@ onUnmounted(() => {
     width: 45px;
     height: 45px;
     font-size: 20px;
+  }
+}
+
+/* 平板设备 (768px < 宽度 < 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .energy-sender {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .balance-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 桌面端大屏幕 (宽度 > 1200px) */
+@media (min-width: 1200px) {
+  .energy-sender {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .balance-section {
+    gap: 20px;
+  }
+  
+  .info-card {
+    padding: 20px;
+  }
+  
+  .send-section {
+    padding: 24px;
+  }
+}
+
+/* 横屏时的特殊优化 */
+@media (max-height: 600px) and (orientation: landscape) {
+  .app-header h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  
+  .app-header p {
+    font-size: 12px;
+  }
+  
+  .balance-section {
+    margin-bottom: 12px;
+  }
+  
+  .info-card {
+    padding: 10px;
+  }
+  
+  .send-section {
+    padding: 12px;
+  }
+  
+  .message-list {
+    max-height: 300px;
+    overflow-y: auto;
   }
 }
 </style>
