@@ -21,7 +21,23 @@
         <label>充值地址</label>
         <div class="address-box">
           <span class="address-text">{{ rechargeAddress }}</span>
-          <button class="copy-btn" @click="copyAddress" title="复制地址">复制</button>
+          <!-- TronLink 环境下显示充值按钮，其他环境显示复制按钮 -->
+          <button 
+            v-if="tronLinkConnected" 
+            class="recharge-btn" 
+            @click="handleRecharge" 
+            title="使用 TronLink 充值"
+          >
+            充值
+          </button>
+          <button 
+            v-else 
+            class="copy-btn" 
+            @click="copyAddress" 
+            title="复制地址"
+          >
+            复制
+          </button>
         </div>
       </div>
     </div>
@@ -109,6 +125,9 @@ declare global {
         base58?: string
       }
       ready?: boolean
+      trx?: {
+        sendTransaction: (to: string, amount: number) => Promise<any>
+      }
     }
     tronLink?: {
       request: (args: { method: string }) => Promise<{ code: number }>
@@ -521,6 +540,61 @@ const copyAddress = async () => {
   }
 }
 
+// 处理充值（TronLink 环境）
+const handleRecharge = async () => {
+  if (!window.tronWeb || !window.tronWeb.trx || !tronLinkConnected.value) {
+    alert('请先连接 TronLink 钱包')
+    return
+  }
+  
+  if (!rechargeAddress.value) {
+    alert('充值地址不存在')
+    return
+  }
+  
+  // 弹窗输入充值数量
+  const amountStr = prompt('请输入充值数量（TRX）：', '100')
+  
+  if (!amountStr) {
+    return  // 用户取消
+  }
+  
+  const amount = parseFloat(amountStr)
+  
+  if (isNaN(amount) || amount <= 0) {
+    alert('请输入有效的充值数量')
+    return
+  }
+  
+  try {
+    console.log(`准备充值 ${amount} TRX 到 ${rechargeAddress.value}`)
+    
+    // 调用 TronLink 转账
+    const transaction = await window.tronWeb.trx.sendTransaction(
+      rechargeAddress.value,
+      amount * 1000000  // TRX 转 sun（1 TRX = 1,000,000 sun）
+    )
+    
+    console.log('交易成功:', transaction)
+    
+    if (transaction && transaction.result) {
+      alert(`充值成功！\n数量: ${amount} TRX\n交易哈希: ${transaction.txid || transaction.transaction?.txID || ''}`)
+      // 刷新余额
+      setTimeout(() => fetchBalance(), 2000)
+    } else {
+      alert('充值失败，请重试')
+    }
+  } catch (error: any) {
+    console.error('充值失败:', error)
+    
+    if (error === 'Confirmation declined by user') {
+      alert('您取消了交易')
+    } else {
+      alert(`充值失败: ${error.message || '未知错误'}`)
+    }
+  }
+}
+
 // 滚动到顶部
 const scrollToTop = () => {
   window.scrollTo({
@@ -659,6 +733,31 @@ onUnmounted(() => {
 }
 
 .copy-btn:active {
+  transform: translateY(0);
+}
+
+/* 充值按钮 */
+.recharge-btn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+}
+
+.recharge-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+.recharge-btn:active {
   transform: translateY(0);
 }
 
