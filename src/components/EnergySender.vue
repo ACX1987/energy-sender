@@ -66,6 +66,16 @@
         暂无发送记录
       </div>
     </div>
+
+    <!-- 5. 回到顶部按钮 -->
+    <button 
+      v-if="showBackToTop" 
+      class="back-to-top"
+      @click="scrollToTop"
+      title="回到顶部"
+    >
+      ↑
+    </button>
   </div>
 </template>
 
@@ -96,6 +106,7 @@ interface Message {
 }
 
 const messages = ref<Message[]>([])
+const showBackToTop = ref<boolean>(false)
 
 // ========== 计算属性 ==========
 const maskedKey = computed(() => {
@@ -313,9 +324,9 @@ const handleSendEnergy = async () => {
       // 添加到消息列表
       messages.value.unshift(msg)
       
-      // 只保留最近20条
-      if (messages.value.length > 20) {
-        messages.value = messages.value.slice(0, 20)
+      // 只保留最近100条
+      if (messages.value.length > 100) {
+        messages.value = messages.value.slice(0, 100)
       }
       
       // 保存到本地
@@ -392,14 +403,29 @@ const formatTime = (timestamp: number) => {
   })
 }
 
+// 滚动到顶部
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+// 监听滚动事件
+const handleScroll = () => {
+  showBackToTop.value = window.scrollY > 300
+}
+
 // ========== 生命周期 ==========
 onMounted(() => {
   loadApiKey()
   loadMessages()
+  window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
   stopBalanceRefresh()
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -632,6 +658,37 @@ onUnmounted(() => {
   color: #999;
 }
 
+/* 回到顶部按钮 */
+.back-to-top {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-to-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.back-to-top:active {
+  transform: translateY(-2px);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .energy-sender {
@@ -643,6 +700,14 @@ onUnmounted(() => {
   }
   
   .info-card .value.highlight {
+    font-size: 20px;
+  }
+  
+  .back-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
     font-size: 20px;
   }
 }
