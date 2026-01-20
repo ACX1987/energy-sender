@@ -182,8 +182,14 @@ let oldEnergy = 0  // 存储发送前的能量值
 const queryAddressEnergy = async (address: string): Promise<number> => {
   try {
     const response = await axios.post('/api/energy', { address })
-    if (response.data && typeof response.data.energy === 'number') {
-      return response.data.energy
+    console.log('能量查询响应:', response.data)
+    
+    // 正确解析返回格式：{ code: 1, data: { energy: xxx } }
+    if (response.data && response.data.code === 1 && response.data.data) {
+      const energy = response.data.data.energy
+      if (typeof energy === 'number') {
+        return energy
+      }
     }
     return 0
   } catch (error) {
