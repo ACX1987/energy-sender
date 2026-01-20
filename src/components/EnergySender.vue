@@ -219,12 +219,17 @@ const verifyEnergyReceived = async (address: string, msgId: string, baseEnergy: 
       isVerifying = false  // 停止验证
       console.log(`✅ 能量验证成功！差值: ${diff}`)
       
+      // 使用 Vue 响应式方式更新状态
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
-        const msg = messages.value[msgIndex]
-        if (msg) {
-          msg.status = 'success'
+        const currentMsg = messages.value[msgIndex]
+        if (currentMsg) {
+          messages.value[msgIndex] = {
+            ...currentMsg,
+            status: 'success' as const
+          }
           saveMessages()
+          console.log('✅ 状态已更新为 success')
         }
       }
       return
@@ -237,10 +242,13 @@ const verifyEnergyReceived = async (address: string, msgId: string, baseEnergy: 
       
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
-        const msg = messages.value[msgIndex]
-        if (msg) {
-          msg.status = 'failed'
-          msg.error = `验证超时（60秒），能量差值: ${diff}`
+        const currentMsg = messages.value[msgIndex]
+        if (currentMsg) {
+          messages.value[msgIndex] = {
+            ...currentMsg,
+            status: 'failed' as const,
+            error: `验证超时（60秒），能量差值: ${diff}`
+          }
           saveMessages()
         }
       }
