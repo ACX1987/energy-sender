@@ -40,6 +40,13 @@
 
     <!-- 3. 发送区域 -->
     <div v-if="apiKey" class="send-section">
+      <!-- TronLink 连接状态 -->
+      <div v-if="tronLinkConnected" class="tronlink-status">
+        <span class="status-dot"></span>
+        <span class="status-text">TronLink 已连接</span>
+        <span class="wallet-address">{{ tronLinkAddress.slice(0, 6) }}...{{ tronLinkAddress.slice(-6) }}</span>
+      </div>
+      
       <input 
         v-model="receiveAddress" 
         placeholder="输入接收能量的地址（TRC20）"
@@ -94,6 +101,21 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { getBalance, sendEnergy } from '../api/energy'
 
+// ========== TypeScript 类型声明 ==========
+declare global {
+  interface Window {
+    tronWeb?: {
+      defaultAddress?: {
+        base58?: string
+      }
+      ready?: boolean
+    }
+    tronLink?: {
+      request: (args: { method: string }) => Promise<{ code: number }>
+    }
+  }
+}
+
 // ========== 配置 ==========
 const ENERGY_AMOUNT = 130000   // 固定能量数量
 const RENT_TIME = 1            // 租用时长（小时）
@@ -107,6 +129,8 @@ const rechargeAddress = ref<string>('')  // 充值地址
 const availableOrders = ref<number>(0)  // 可用笔数（介接口获取）
 const receiveAddress = ref<string>('')
 const sending = ref<boolean>(false)
+const tronLinkConnected = ref<boolean>(false)  // TronLink 连接状态
+const tronLinkAddress = ref<string>('')        // TronLink 地址
 
 interface Message {
   id: string
@@ -200,6 +224,51 @@ const startBalanceRefresh = () => {
 
 const stopBalanceRefresh = () => {
   if (balanceTimer) clearInterval(balanceTimer)
+}
+
+// ========== TronLink 钱包集成 ==========
+// 检测 TronLink 是否可用
+const detectTronLink = async () => {
+  // 检查 window.tronWeb 是否存在
+  if (window.tronWeb && window.tronWeb.defaultAddress && window.tronWeb.defaultAddress.base58) {
+    tronLinkConnected.value = true
+    tronLinkAddress.value = window.tronWeb.defaultAddress.base58
+    console.log('TronLink 已连接:', tronLinkAddress.value)
+    
+    // 自动填充地址（如果输入框为空）
+    if (!receiveAddress.value) {
+      receiveAddress.value = tronLinkAddress.value
+    }
+    return true
+  }
+  return false
+}
+
+// 监听 TronLink 账户变化
+const watchTronLinkAccount = () => {
+  if (window.tronWeb) {
+    // 监听账户变化
+    setInterval(() => {
+      if (window.tronWeb && window.tronWeb.defaultAddress && window.tronWeb.defaultAddress.base58) {
+        const newAddress = window.tronWeb.defaultAddress.base58
+        if (newAddress !== tronLinkAddress.value) {
+          tronLinkAddress.value = newAddress
+          tronLinkConnected.value = true
+          console.log('TronLink 账户变更:', newAddress)
+          
+          // 更新接收地址（如果是之前的钱包地址）
+          if (receiveAddress.value === '' || receiveAddress.value === tronLinkAddress.value) {
+            receiveAddress.value = newAddress
+          }
+        }
+      } else if (tronLinkConnected.value) {
+        // TronLink 断开连接
+        tronLinkConnected.value = false
+        tronLinkAddress.value = ''
+        console.log('TronLink 已断开')
+      }
+    }, 1000)  // 每秒检查一次
+  }
 }
 
 // ========== 能量发送 ==========
@@ -470,6 +539,12 @@ onMounted(() => {
   loadApiKey()
   loadMessages()
   window.addEventListener('scroll', handleScroll)
+  
+  // 初始化 TronLink
+  setTimeout(() => {
+    detectTronLink()
+    watchTronLinkAccount()
+  }, 500)  // 等待 TronLink 加载
 })
 
 onUnmounted(() => {
@@ -627,6 +702,50 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+}
+
+/* TronLink 连接状态 */
+.tronlink-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.wallet-address {
+  margin-left: auto;
+  font-family: monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 .send-section input {
