@@ -26,9 +26,11 @@
             v-if="tronLinkConnected" 
             class="recharge-btn" 
             @click="handleRecharge" 
+            :disabled="recharging"
+            :class="{ loading: recharging }"
             title="使用 TronLink 充值"
           >
-            充值
+            {{ recharging ? '充值中...' : '充值' }}
           </button>
           <button 
             v-else 
@@ -148,6 +150,7 @@ const rechargeAddress = ref<string>('')  // 充值地址
 const availableOrders = ref<number>(0)  // 可用笔数（介接口获取）
 const receiveAddress = ref<string>('')
 const sending = ref<boolean>(false)
+const recharging = ref<boolean>(false)  // 充值中状态
 const tronLinkConnected = ref<boolean>(false)  // TronLink 连接状态
 const tronLinkAddress = ref<string>('')        // TronLink 地址
 
@@ -566,6 +569,9 @@ const handleRecharge = async () => {
     return
   }
   
+  // 开启 loading 状态
+  recharging.value = true
+  
   try {
     console.log(`准备充值 ${amount} TRX 到 ${rechargeAddress.value}`)
     
@@ -592,6 +598,9 @@ const handleRecharge = async () => {
     } else {
       alert(`充值失败: ${error.message || '未知错误'}`)
     }
+  } finally {
+    // 关闭 loading 状态
+    recharging.value = false
   }
 }
 
@@ -752,14 +761,23 @@ onUnmounted(() => {
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.recharge-btn:hover {
+.recharge-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   background: linear-gradient(135deg, #7c8fef 0%, #8a5db7 100%) !important;
 }
 
-.recharge-btn:active {
+.recharge-btn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.recharge-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.recharge-btn.loading {
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 /* 余额信息区域 */
