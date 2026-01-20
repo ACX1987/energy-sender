@@ -17,7 +17,7 @@ import EnergySender from './components/EnergySender.vue'
       <EnergySender />
     </main>
     <footer class="app-footer">
-      <p>Powered by TRX.CEO API</p>
+      <p>Powered by <a href="https://wwtrx.com" target="_blank" rel="noopener">wwtrx.com</a></p>
     </footer>
   </div>
 </template>
@@ -85,6 +85,18 @@ main {
   padding: 20px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
+}
+
+.app-footer a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.app-footer a:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
