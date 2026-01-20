@@ -4,15 +4,6 @@ import EnergySender from './components/EnergySender.vue'
 
 <template>
   <div id="app">
-    <header class="app-header">
-      <div class="header-logo">
-        <img src="/tron-logo.svg" alt="TRON" class="logo-icon" />
-        <div class="header-text">
-          <h1>⚡ TRON 能量发送工具</h1>
-          <p>快速发送 TRON 能量</p>
-        </div>
-      </div>
-    </header>
     <main>
       <EnergySender />
     </main>
@@ -39,40 +30,6 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-.app-header {
-  text-align: center;
-  padding: 40px 20px 20px;
-  color: white;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.logo-icon {
-  width: 48px;
-  height: 48px;
-  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
-}
-
-.header-text {
-  text-align: left;
-}
-
-.app-header h1 {
-  font-size: 32px;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.app-header p {
-  font-size: 14px;
-  opacity: 0.9;
 }
 
 main {
@@ -102,27 +59,6 @@ main {
 /* 响应式设计 */
 /* 移动端竖屏 */
 @media (max-width: 480px) {
-  .app-header h1 {
-    font-size: 20px;
-  }
-  
-  .app-header p {
-    font-size: 13px;
-  }
-  
-  .app-header {
-    padding: 16px 10px 10px;
-  }
-  
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .header-logo {
-    gap: 10px;
-  }
-  
   main {
     padding: 10px;
   }
@@ -135,23 +71,6 @@ main {
 
 /* 移动端横屏 / 小屏幕设备 */
 @media (min-width: 481px) and (max-width: 768px) {
-  .app-header h1 {
-    font-size: 24px;
-  }
-  
-  .app-header {
-    padding: 20px 12px 12px;
-  }
-  
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .header-logo {
-    gap: 12px;
-  }
-  
   main {
     padding: 12px;
   }
@@ -159,36 +78,11 @@ main {
 
 /* 平板设备 */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .app-header h1 {
-    font-size: 28px;
-  }
-  
-  .logo-icon {
-    width: 42px;
-    height: 42px;
-  }
+  /* 保持默认样式 */
 }
 
 /* 横屏低高度优化 */
 @media (max-height: 600px) and (orientation: landscape) {
-  .app-header {
-    padding: 12px 16px 8px;
-  }
-  
-  .app-header h1 {
-    font-size: 18px;
-    margin-bottom: 2px;
-  }
-  
-  .app-header p {
-    font-size: 12px;
-  }
-  
-  .logo-icon {
-    width: 28px;
-    height: 28px;
-  }
-  
   main {
     padding: 12px;
   }
