@@ -176,7 +176,6 @@ const stopBalanceRefresh = () => {
 }
 
 // ========== 能量发送 ==========
-let oldEnergy = 0  // 存储发送前的能量值
 
 // 查询地址能量
 const queryAddressEnergy = async (address: string): Promise<number> => {
@@ -277,8 +276,8 @@ const handleSendEnergy = async () => {
   
   try {
     // 1. 先查询发送前的能量（重要！）
-    oldEnergy = await queryAddressEnergy(address)
-    console.log('发送前能量:', oldEnergy)
+    const baseEnergy = await queryAddressEnergy(address)
+    console.log('发送前能量:', baseEnergy)
     
     // 2. 再发送能量请求
     const response = await sendEnergy(
@@ -310,8 +309,8 @@ const handleSendEnergy = async () => {
       // 保存到本地
       saveMessages()
       
-      // 4. 开始验证能量到账（使用之前查询的 oldEnergy 作为基准）
-      verifyEnergyReceived(address, msgId, oldEnergy)
+      // 4. 开始验证能量到账（使用刚查询的 baseEnergy 作为基准）
+      verifyEnergyReceived(address, msgId, baseEnergy)
       
       // 清空输入框并刷新余额
       receiveAddress.value = ''
