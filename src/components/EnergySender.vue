@@ -1,45 +1,27 @@
 <template>
   <div class="energy-sender">
-    <!-- 1. API Key 区域 -->
-    <div class="api-key-section">
-      <div v-if="!apiKey" class="input-mode">
-        <input 
-          v-model="apiKeyInput" 
-          type="text"
-          placeholder="请输入 API Key" 
-          @keyup.enter="saveApiKey"
-        />
-        <button @click="saveApiKey">确认</button>
+    <!-- 1. 顶部头部区域：Logo+标题 左侧，API Key 右侧 -->
+    <div class="header-section">
+      <div class="header-left">
+        <img src="/tron-logo.svg" alt="TRON" class="logo-icon" />
+        <div class="header-text">
+          <h1>⚡ TRON 能量发送工具</h1>
+          <p>快速发送 TRON 能量</p>
+        </div>
       </div>
-      <div v-else class="display-mode">
-        <span>API Key: {{ maskedKey }}</span>
-        <button @click="changeApiKey">更换</button>
-      </div>
-      
-      <!-- 充值地址 -->
-      <div v-if="apiKey && rechargeAddress" class="recharge-address">
-        <label>充值地址</label>
-        <div class="address-box">
-          <span class="address-text">{{ rechargeAddress }}</span>
-          <!-- TronLink 环境下显示充值按钮，其他环境显示复制按钮 -->
-          <button 
-            v-if="tronLinkConnected" 
-            class="recharge-btn" 
-            @click="handleRecharge" 
-            :disabled="recharging"
-            :class="{ loading: recharging }"
-            title="使用 TronLink 充值"
-          >
-            {{ recharging ? '充值中...' : '充值' }}
-          </button>
-          <button 
-            v-else 
-            class="copy-btn" 
-            @click="copyAddress" 
-            title="复制地址"
-          >
-            复制
-          </button>
+      <div class="header-right">
+        <div v-if="!apiKey" class="input-mode">
+          <input 
+            v-model="apiKeyInput" 
+            type="text"
+            placeholder="请输入 API Key" 
+            @keyup.enter="saveApiKey"
+          />
+          <button @click="saveApiKey">确认</button>
+        </div>
+        <div v-else class="display-mode">
+          <span>{{ maskedKey }}</span>
+          <button @click="changeApiKey">更换</button>
         </div>
       </div>
     </div>
@@ -56,7 +38,34 @@
       </div>
     </div>
 
-    <!-- 3. 发送区域 -->
+    <!-- 3. 充值地址区域 -->
+    <div v-if="apiKey && rechargeAddress" class="recharge-section">
+      <label>充值地址</label>
+      <div class="recharge-box">
+        <span class="address-text">{{ rechargeAddress }}</span>
+        <!-- TronLink 环境下显示充值按钮，其他环境显示复制按钮 -->
+        <button 
+          v-if="tronLinkConnected" 
+          class="recharge-btn" 
+          @click="handleRecharge" 
+          :disabled="recharging"
+          :class="{ loading: recharging }"
+          title="使用 TronLink 充值"
+        >
+          {{ recharging ? '充值中...' : '充值' }}
+        </button>
+        <button 
+          v-else 
+          class="copy-btn" 
+          @click="copyAddress" 
+          title="复制地址"
+        >
+          复制
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. 发送区域 -->
     <div v-if="apiKey" class="send-section">
       <!-- TronLink 连接状态 -->
       <div v-if="tronLinkConnected" class="tronlink-status">
@@ -65,21 +74,24 @@
         <span class="wallet-address">{{ tronLinkAddress.slice(0, 6) }}...{{ tronLinkAddress.slice(-6) }}</span>
       </div>
       
-      <input 
-        v-model="receiveAddress" 
-        placeholder="输入接收能量的地址（TRC20）"
-        :disabled="sending"
-      />
-      <button 
-        @click="handleSendEnergy" 
-        :disabled="sending || !receiveAddress"
-        :class="{ loading: sending }"
-      >
-        {{ sending ? '发送中...' : '发送能量' }}
-      </button>
+      <label>接收能量地址</label>
+      <div class="send-box">
+        <input 
+          v-model="receiveAddress" 
+          placeholder="输入接收能量的地址（TRC20）"
+          :disabled="sending"
+        />
+        <button 
+          @click="handleSendEnergy" 
+          :disabled="sending || !receiveAddress"
+          :class="{ loading: sending }"
+        >
+          {{ sending ? '发送中...' : '发送能量' }}
+        </button>
+      </div>
     </div>
 
-    <!-- 4. 消息列表 -->
+    <!-- 5. 消息列表 -->
     <div v-if="apiKey" class="message-list">
       <h3>发送记录</h3>
       <div 
@@ -102,7 +114,7 @@
       </div>
     </div>
 
-    <!-- 5. 回到顶部按钮 -->
+    <!-- 6. 回到顶部按钮 -->
     <button 
       v-if="showBackToTop" 
       class="back-to-top"
@@ -638,17 +650,51 @@ onUnmounted(() => {
 
 <style scoped>
 .energy-sender {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* API Key 区域 */
-.api-key-section {
+/* 顶部头部区域 */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.header-text h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 4px 0;
+}
+
+.header-text p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
 }
 
 .input-mode, .display-mode {
@@ -659,6 +705,7 @@ onUnmounted(() => {
 
 .input-mode input, .display-mode span {
   flex: 1;
+  min-width: 180px;
 }
 
 .input-mode input {
@@ -674,7 +721,7 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
-.api-key-section button {
+.header-right button {
   padding: 10px 20px;
   background: rgba(255, 255, 255, 0.9);
   border: none;
@@ -682,42 +729,77 @@ onUnmounted(() => {
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
+  white-space: nowrap;
 }
 
-.api-key-section button:hover {
+.header-right button:hover {
   background: #fff;
 }
 
-/* 充值地址 */
-.recharge-address {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+/* 余额信息区域 */
+.balance-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-.recharge-address label {
+.info-card {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.info-card label {
   display: block;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
+  font-size: 12px;
+  color: #666;
   margin-bottom: 8px;
-  font-weight: 500;
 }
 
-.address-box {
+.info-card .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-card .value.highlight {
+  color: #52c41a;
+  font-size: 24px;
+}
+
+/* 充值地址区域 */
+.recharge-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.recharge-section label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.recharge-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 10px 12px;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 12px 16px;
   border-radius: 8px;
-  backdrop-filter: blur(10px);
 }
 
 .address-text {
   flex: 1;
-  color: white;
   font-family: monospace;
   font-size: 13px;
+  color: #333;
   word-break: break-all;
   line-height: 1.4;
 }
@@ -822,6 +904,60 @@ onUnmounted(() => {
   margin-bottom: 20px;
 }
 
+.send-section > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.send-box {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.send-box input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.send-box input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.send-box button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.send-box button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.send-box button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-box button.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* TronLink 连接状态 */
 .tronlink-status {
   display: flex;
@@ -864,47 +1000,6 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.2);
   padding: 4px 10px;
   border-radius: 6px;
-}
-
-.send-section input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
-  margin-bottom: 12px;
-  box-sizing: border-box;
-}
-
-.send-section input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.send-section button {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.send-section button:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.send-section button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.send-section button.loading {
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -1047,8 +1142,39 @@ onUnmounted(() => {
     padding: 10px;
   }
   
-  .api-key-section {
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
     padding: 16px;
+  }
+  
+  .header-left {
+    gap: 12px;
+  }
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .header-text h1 {
+    font-size: 18px;
+  }
+  
+  .header-text p {
+    font-size: 12px;
+  }
+  
+  .header-right {
+    width: 100%;
+  }
+  
+  .input-mode, .display-mode {
+    width: 100%;
+  }
+  
+  .input-mode input {
+    min-width: auto;
   }
   
   .balance-section {
@@ -1072,21 +1198,16 @@ onUnmounted(() => {
     font-size: 20px;
   }
   
-  .send-section {
+  .recharge-section, .send-section {
     padding: 16px;
   }
   
-  .send-section input {
-    padding: 10px 12px;
+  .send-box {
+    flex-direction: column;
   }
   
-  .send-section button {
-    padding: 12px;
-    font-size: 15px;
-  }
-  
-  .message-list h3 {
-    font-size: 16px;
+  .send-box button {
+    width: 100%;
   }
   
   .message-item {
@@ -1163,12 +1284,12 @@ onUnmounted(() => {
 
 /* 横屏时的特殊优化 */
 @media (max-height: 600px) and (orientation: landscape) {
-  .app-header h1 {
+  .header-text h1 {
     font-size: 20px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
   
-  .app-header p {
+  .header-text p {
     font-size: 12px;
   }
   
@@ -1180,7 +1301,7 @@ onUnmounted(() => {
     padding: 10px;
   }
   
-  .send-section {
+  .send-section, .recharge-section {
     padding: 12px;
   }
   
