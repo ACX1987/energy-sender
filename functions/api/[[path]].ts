@@ -52,6 +52,17 @@ export const onRequest = async (context: { request: Request; env: Env }) => {
         },
         body: params
       }
+    } else if (apiPath === 'energy') {
+      // 查询地址能量
+      const body = await request.json() as { address: string }
+      
+      targetUrl = `${TRX_API_BASE}/api/index/energy?address=${body.address}`
+      requestInit = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
     } else if (apiPath === 'send') {
       // 发送能量
       const body = await request.json() as {

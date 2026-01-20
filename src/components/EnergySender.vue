@@ -181,7 +181,7 @@ let oldEnergy = 0  // 存储发送前的能量值
 // 查询地址能量
 const queryAddressEnergy = async (address: string): Promise<number> => {
   try {
-    const response = await axios.get(`https://trx.ceo/api/index/energy?address=${address}`)
+    const response = await axios.post('/api/energy', { address })
     if (response.data && typeof response.data.energy === 'number') {
       return response.data.energy
     }
