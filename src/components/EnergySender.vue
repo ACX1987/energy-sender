@@ -469,7 +469,7 @@ onUnmounted(() => {
   padding: 10px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .display-mode span {
@@ -539,7 +539,7 @@ onUnmounted(() => {
   padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 12px;
   box-sizing: border-box;
 }
@@ -741,7 +741,6 @@ onUnmounted(() => {
   }
   
   .send-section input {
-    font-size: 14px;
     padding: 10px 12px;
   }
   
