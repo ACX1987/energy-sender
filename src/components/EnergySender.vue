@@ -27,10 +27,6 @@
         <label>单笔成本</label>
         <span class="value">{{ costPerOrder.toFixed(2) }} TRX</span>
       </div>
-      <div class="info-card">
-        <label>账户余额</label>
-        <span class="value">{{ balance.toFixed(2) }} TRX</span>
-      </div>
     </div>
 
     <!-- 3. 发送区域 -->
@@ -354,7 +350,7 @@ onUnmounted(() => {
 /* 余额信息区域 */
 .balance-section {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }
