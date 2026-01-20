@@ -231,14 +231,14 @@ const verifyEnergyReceived = async (address: string, msgId: string): Promise<voi
     // 超过最大尝试次数
     if (attempts >= maxAttempts) {
       isVerifying = false  // 停止验证
-      console.log('❌ 验证超时')
+      console.log('❌ 验证超时（60秒）')
       
       const msgIndex = messages.value.findIndex(m => m.id === msgId)
       if (msgIndex !== -1) {
         const msg = messages.value[msgIndex]
         if (msg) {
           msg.status = 'failed'
-          msg.error = '验证超时，请手动检查'
+          msg.error = '验证超时（60秒），能量可能延迟到账'
           saveMessages()
         }
       }
