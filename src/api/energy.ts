@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'https://www.trx.ceo'
+// 使用本地 API 代理，隐藏 trx.ceo 域名
+const API_BASE_URL = '/api'
 
 export interface BalanceResponse {
   code: number
@@ -23,15 +24,12 @@ export interface SendEnergyResponse {
  * 查询可用笔数
  */
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
-  const params = new URLSearchParams()
-  params.append('apikey', apiKey)
-  
   const response = await axios.post<BalanceResponse>(
-    `${API_BASE_URL}/api/user/getBalancebykey`,
-    params,
+    `${API_BASE_URL}/balance`,
+    { apikey: apiKey },
     {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       }
     }
   )
@@ -50,14 +48,13 @@ export async function sendEnergy(
   resLock: number = 0
 ): Promise<SendEnergyResponse> {
   const response = await axios.post<SendEnergyResponse>(
-    `${API_BASE_URL}/api/v1/payk`,
+    `${API_BASE_URL}/send`,
     {
-      key: apiKey,
-      resType: 'ENERGY',
-      payNums: energyAmount.toString(),
-      rentTime: rentTime.toString(),
-      resLock: resLock.toString(),
-      receiveAddress: receiveAddress
+      apikey: apiKey,
+      receiveAddress: receiveAddress,
+      energyAmount: energyAmount,
+      rentTime: rentTime,
+      resLock: resLock
     },
     {
       headers: {
