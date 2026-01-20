@@ -15,6 +15,15 @@
         <span>API Key: {{ maskedKey }}</span>
         <button @click="changeApiKey">更换</button>
       </div>
+      
+      <!-- 充值地址 -->
+      <div v-if="apiKey && rechargeAddress" class="recharge-address">
+        <label>充值地址</label>
+        <div class="address-box">
+          <span class="address-text">{{ rechargeAddress }}</span>
+          <button class="copy-btn" @click="copyAddress" title="复制地址">复制</button>
+        </div>
+      </div>
     </div>
 
     <!-- 2. 余额信息区域 -->
@@ -94,7 +103,8 @@ const COST_PER_ORDER = 6       // 单笔预估成本（TRX）
 // ========== 状态 ==========
 const apiKey = ref<string>('')
 const apiKeyInput = ref<string>('')
-const availableOrders = ref<number>(0)  // 可用笔数（从接口获取）
+const rechargeAddress = ref<string>('')  // 充值地址
+const availableOrders = ref<number>(0)  // 可用笔数（介接口获取）
 const receiveAddress = ref<string>('')
 const sending = ref<boolean>(false)
 
@@ -164,6 +174,11 @@ const fetchBalance = async () => {
         : typeof data === 'number'
         ? data
         : 0
+      
+      // 保存充值地址（从 msg 字段获取）
+      if (response.msg && response.msg.length > 0) {
+        rechargeAddress.value = response.msg
+      }
     } else {
       console.error('余额查询失败:', response.msg)
       // 如果是 API Key 错误，清除缓存
@@ -414,6 +429,29 @@ const fillAddress = (address: string) => {
   })
 }
 
+// 复制地址
+const copyAddress = async () => {
+  if (!rechargeAddress.value) return
+  
+  try {
+    await navigator.clipboard.writeText(rechargeAddress.value)
+    alert('地址已复制到剪贴板')
+  } catch (error) {
+    // 降级方案：使用 textarea
+    const textarea = document.createElement('textarea')
+    textarea.value = rechargeAddress.value
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      alert('地址已复制到剪贴板')
+    } catch (e) {
+      alert('复制失败，请手动复制')
+    }
+    document.body.removeChild(textarea)
+  }
+}
+
 // 滚动到顶部
 const scrollToTop = () => {
   window.scrollTo({
@@ -490,6 +528,63 @@ onUnmounted(() => {
 
 .api-key-section button:hover {
   background: #fff;
+}
+
+/* 充值地址 */
+.recharge-address {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.recharge-address label {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.address-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.address-text {
+  flex: 1;
+  color: white;
+  font-family: monospace;
+  font-size: 13px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.copy-btn {
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
 }
 
 /* 余额信息区域 */
