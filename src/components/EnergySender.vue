@@ -353,6 +353,15 @@ const loadMessages = () => {
   if (stored) {
     try {
       messages.value = JSON.parse(stored)
+      
+      // 页面加载时，将所有“验证中”的记录标记为超时
+      messages.value.forEach(msg => {
+        if (msg.status === 'pending') {
+          msg.status = 'failed'
+          msg.error = '页面刷新，验证中断，请手动检查'
+        }
+      })
+      saveMessages()
     } catch {
       messages.value = []
     }
