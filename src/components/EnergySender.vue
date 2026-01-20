@@ -258,10 +258,11 @@ const handleSendEnergy = async () => {
   const address = receiveAddress.value.trim()
   
   try {
-    // 1. 查询发送前的能量
+    // 1. 先查询发送前的能量（重要！）
     oldEnergy = await queryAddressEnergy(address)
+    console.log('发送前能量:', oldEnergy)
     
-    // 2. 发送能量
+    // 2. 再发送能量请求
     const response = await sendEnergy(
       apiKey.value,
       address,
@@ -271,7 +272,7 @@ const handleSendEnergy = async () => {
     )
     
     if (response.code === 1) {
-      // 3. 创建待验证的消息记录
+      // 3. 发送成功，创建待验证的消息记录
       const msgId = Date.now().toString()
       const msg: Message = {
         id: msgId,
@@ -291,7 +292,7 @@ const handleSendEnergy = async () => {
       // 保存到本地
       saveMessages()
       
-      // 4. 开始验证能量到账
+      // 4. 开始验证能量到账（使用之前查询的 oldEnergy）
       verifyEnergyReceived(address, msgId)
       
       // 清空输入框并刷新余额
