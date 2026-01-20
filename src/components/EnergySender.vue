@@ -52,6 +52,7 @@
         v-for="msg in messages" 
         :key="msg.id"
         :class="['message-item', msg.status]"
+        @click="fillAddress(msg.address)"
       >
         <div class="msg-header">
           <span class="time">{{ formatTime(msg.timestamp) }}</span>
@@ -403,6 +404,16 @@ const formatTime = (timestamp: number) => {
   })
 }
 
+// 填充地址到输入框
+const fillAddress = (address: string) => {
+  receiveAddress.value = address
+  // 滚动到发送区域
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
 // 滚动到顶部
 const scrollToTop = () => {
   window.scrollTo({
@@ -587,6 +598,14 @@ onUnmounted(() => {
   margin-bottom: 12px;
   border-left: 4px solid transparent;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.message-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  background: #f8f9fa;
 }
 
 .message-item.success {
