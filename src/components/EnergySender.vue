@@ -738,13 +738,13 @@ onUnmounted(() => {
 
 /* 充值按钮 */
 .recharge-btn {
-  padding: 6px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 6px 16px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   border: none;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: white !important;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -755,7 +755,7 @@ onUnmounted(() => {
 .recharge-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #7c8fef 0%, #8a5db7 100%);
+  background: linear-gradient(135deg, #7c8fef 0%, #8a5db7 100%) !important;
 }
 
 .recharge-btn:active {
